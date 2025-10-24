@@ -1,0 +1,6 @@
+@staj_forum_backend_HostAddress = http://localhost:5236
+
+GET {{staj_forum_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
