@@ -4,6 +4,7 @@ StajForum, öğrencilerin staj deneyimlerini paylaşabileceği ve bilgi alışve
 
 ## 📋 İçindekiler
 
+- [Proje Durumu](#proje-durumu)
 - [Özellikler](#özellikler)
 - [Teknolojiler](#teknolojiler)
 - [Proje Yapısı](#proje-yapısı)
@@ -13,10 +14,49 @@ StajForum, öğrencilerin staj deneyimlerini paylaşabileceği ve bilgi alışve
 - [Kullanım Örnekleri](#kullanım-örnekleri)
 - [Katmanlı Mimari](#katmanlı-mimari)
 
+## 🚀 Proje Durumu
+
+Bu proje şu ana kadar aşağıdaki özelliklerle geliştirilmiştir:
+
+### Tamamlanan Özellikler
+
+1. **Forum Sistemi**
+   - Konu (Topic) oluşturma, güncelleme, silme ve listeleme
+   - Konulara yanıt (Reply) ekleme, güncelleme ve silme
+   - Konu detayları ve yanıtlarını görüntüleme
+   - Konu görüntülenme sayısı takibi
+   - Konu başlığına göre arama
+   - Tarih, popülerlik ve görüntülenme sayısına göre sıralama
+   - Sayfalama desteği
+
+2. **İletişim Sistemi**
+   - İletişim formu ile mesaj gönderme
+   - Mesajları listeleme (admin için)
+   - Mesaj detaylarını görüntüleme
+   - Mesajları okundu olarak işaretleme
+   - Mesaj silme
+   - Okunmamış/okunmuş mesaj filtreleme
+
+3. **Chat Sistemi** (Temel Yapı)
+   - ChatGPT entegrasyonu için hazır altyapı
+   - Mesaj gönderme endpoint'i (şu an mock response)
+   - Chat geçmişi getirme (hazır altyapı)
+   - Chat geçmişi silme (hazır altyapı)
+
+4. **Teknik Altyapı**
+   - Katmanlı mimari (Controller → Service → Repository)
+   - Repository Pattern implementasyonu
+   - AutoMapper ile DTO mapping
+   - Entity Framework Core ile PostgreSQL entegrasyonu
+   - CORS yapılandırması
+   - Swagger/OpenAPI desteği
+   - Kapsamlı validation
+
 ## ✨ Özellikler
 
 - ✅ **Forum Sistemi**: Konu oluşturma, yanıt verme ve tartışma
 - ✅ **İletişim Formu**: Kullanıcıların mesaj gönderebileceği iletişim sistemi
+- ✅ **Chat Sistemi**: ChatGPT entegrasyonu için hazır altyapı (geliştirme aşamasında)
 - ✅ **Sayfalama**: Tüm listeleme işlemlerinde sayfalama desteği
 - ✅ **Sıralama**: Tarih, popülerlik ve görüntülenme sayısına göre sıralama
 - ✅ **Arama**: Forum konularında başlık araması
@@ -40,13 +80,16 @@ StajForum, öğrencilerin staj deneyimlerini paylaşabileceği ve bilgi alışve
 staj-forum-backend/
 ├── Controllers/              # API Endpoints (Presentation Layer)
 │   ├── ForumController.cs
-│   └── ContactController.cs
+│   ├── ContactController.cs
+│   └── ChatController.cs
 │
 ├── Services/                 # Business Logic Layer
 │   ├── IForumService.cs
 │   ├── ForumService.cs
 │   ├── IContactService.cs
-│   └── ContactService.cs
+│   ├── ContactService.cs
+│   ├── IChatService.cs
+│   └── ChatService.cs
 │
 ├── Data/                     # Data Access Layer
 │   ├── ApplicationDbContext.cs
@@ -65,8 +108,22 @@ staj-forum-backend/
 │
 ├── DTOs/                     # Data Transfer Objects
 │   ├── Common/
+│   │   ├── ApiResponseDto.cs
+│   │   └── PagedResultDto.cs
 │   ├── Forum/
-│   └── Contact/
+│   │   ├── TopicDto.cs
+│   │   ├── TopicDetailDto.cs
+│   │   ├── CreateTopicDto.cs
+│   │   ├── UpdateTopicDto.cs
+│   │   ├── ReplyDto.cs
+│   │   └── CreateReplyDto.cs
+│   ├── Contact/
+│   │   ├── ContactMessageDto.cs
+│   │   └── CreateContactDto.cs
+│   └── Chat/
+│       ├── ChatRequestDto.cs
+│       ├── ChatResponseDto.cs
+│       └── ChatMessageDto.cs
 │
 ├── Mappings/                # AutoMapper Configuration
 │   └── MappingProfile.cs
@@ -176,6 +233,12 @@ http://localhost:5236/api
 | PUT | `/api/forum/topics/{id}` | Konu güncelle |
 | DELETE | `/api/forum/topics/{id}` | Konu sil |
 
+**Query Parameters (GET /api/forum/topics):**
+- `page` (int, default: 1) - Sayfa numarası
+- `pageSize` (int, default: 10) - Sayfa başına kayıt
+- `sortBy` (string: "newest" \| "oldest" \| "popular", default: "newest")
+- `search` (string, optional) - Başlık araması
+
 #### Yanıtlar
 
 | Method | Endpoint | Açıklama |
@@ -184,6 +247,11 @@ http://localhost:5236/api
 | POST | `/api/forum/topics/{topicId}/replies` | Yeni yanıt ekle |
 | PUT | `/api/forum/replies/{id}` | Yanıt güncelle |
 | DELETE | `/api/forum/replies/{id}` | Yanıt sil |
+
+**Query Parameters (GET /api/forum/topics/{topicId}/replies):**
+- `page` (int, default: 1) - Sayfa numarası
+- `pageSize` (int, default: 20) - Sayfa başına kayıt
+- `sortBy` (string: "newest" \| "oldest", default: "oldest")
 
 ### Contact Endpoints
 
@@ -194,6 +262,21 @@ http://localhost:5236/api
 | GET | `/api/contact/{id}` | Mesaj detayı (admin) |
 | PUT | `/api/contact/{id}/read` | Okundu işaretle (admin) |
 | DELETE | `/api/contact/{id}` | Mesaj sil (admin) |
+
+**Query Parameters (GET /api/contact):**
+- `page` (int, default: 1) - Sayfa numarası
+- `pageSize` (int, default: 20) - Sayfa başına kayıt
+- `isRead` (bool?, optional) - Okunmuş/okunmamış filtreleme
+
+### Chat Endpoints
+
+| Method | Endpoint | Açıklama |
+|--------|----------|----------|
+| POST | `/api/chat` | ChatGPT'ye mesaj gönder ve yanıt al |
+| GET | `/api/chat/history` | Chat geçmişini getir |
+| DELETE | `/api/chat/history/{conversationId}` | Chat geçmişini sil |
+
+**Not:** Chat sistemi şu anda temel yapıyla hazırlanmıştır. OpenAI API entegrasyonu yapıldığında tam işlevsel hale gelecektir.
 
 ## 💡 Kullanım Örnekleri
 
@@ -246,6 +329,33 @@ Content-Type: application/json
   "subject": "Genel Bilgi",
   "message": "Merhaba, staj programı hakkında bilgi almak istiyorum."
 }
+```
+
+### Chat Mesajı Gönderme
+
+```http
+POST /api/chat
+Content-Type: application/json
+
+{
+  "message": "Staj başvurusu nasıl yapılır?",
+  "conversationId": "optional-conversation-id"
+}
+```
+
+**Response:**
+```json
+{
+  "response": "Staj hakkında sorduğunuz 'Staj başvurusu nasıl yapılır?' sorusu için: ...",
+  "conversationId": "guid-string",
+  "timestamp": "2024-01-01T12:00:00Z"
+}
+```
+
+### Chat Geçmişi Getirme
+
+```http
+GET /api/chat/history?conversationId=your-conversation-id
 ```
 
 ## 🏗 Katmanlı Mimari
