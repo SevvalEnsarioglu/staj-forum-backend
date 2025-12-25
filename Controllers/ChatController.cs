@@ -42,6 +42,29 @@ public class ChatController : ControllerBase
     }
 
     /// <summary>
+    /// CV Analizi yapar
+    /// </summary>
+    [HttpPost("analyze-cv")]
+    [ProducesResponseType(typeof(CVAnalysisResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<CVAnalysisResponseDto>> AnalyzeCv([FromBody] CVAnalysisRequestDto request)
+    {
+        if (string.IsNullOrWhiteSpace(request?.CvText))
+            return BadRequest(new { error = "CV Text is required." });
+
+        try
+        {
+            var analysisResult = await _chatService.AnalyzeCvAsync(request.CvText);
+            return Ok(new CVAnalysisResponseDto { Analysis = analysisResult });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error analyzing CV");
+            return StatusCode(500, new { error = "An error occurred while analyzing the CV." });
+        }
+    }
+
+    /// <summary>
     /// Chat geçmişini getirir (opsiyonel)
     /// </summary>
     [HttpGet("history")]
