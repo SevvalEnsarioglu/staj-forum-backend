@@ -34,6 +34,7 @@ builder.Services.AddScoped<IContactRepository, ContactRepository>();
 builder.Services.AddScoped<IForumService, ForumService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddHttpClient<IGeminiService, GeminiService>();
 
 // CORS Configuration
 builder.Services.AddCors(options =>

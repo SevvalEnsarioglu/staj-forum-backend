@@ -5,36 +5,29 @@ namespace staj_forum_backend.Services;
 public class ChatService : IChatService
 {
     private readonly ILogger<ChatService> _logger;
-    private readonly IConfiguration _configuration;
+    private readonly IGeminiService _geminiService;
 
-    public ChatService(ILogger<ChatService> logger, IConfiguration configuration)
+    public ChatService(ILogger<ChatService> logger, IGeminiService geminiService)
     {
         _logger = logger;
-        _configuration = configuration;
+        _geminiService = geminiService;
     }
 
-    public Task<ChatResponseDto> SendMessageAsync(ChatRequestDto chatRequest)
+    public async Task<ChatResponseDto> SendMessageAsync(ChatRequestDto chatRequest)
     {
-        // TODO: OpenAI API entegrasyonu buraya eklenecek
-        // Şimdilik mock response döndürüyoruz
-        
         var conversationId = chatRequest.ConversationId ?? Guid.NewGuid().ToString();
         
-        // Mock response - OpenAI API entegrasyonu yapıldığında bu kısım değişecek
-        var mockResponse = $"Staj hakkında sorduğunuz '{chatRequest.Message}' sorusu için: " +
-                          "Staj başvurusu yapmak için öncelikle şirketlerin kariyer sayfalarını " +
-                          "ziyaret edebilir veya LinkedIn üzerinden başvuru yapabilirsiniz. " +
-                          "Staj sürecinde CV'nizi güncel tutmanız ve ilgili deneyimlerinizi " +
-                          "vurgulamanız önemlidir.";
+        // Use Gemini Service to get AI response
+        var aiResponse = await _geminiService.GenerateResponseAsync(chatRequest.Message);
 
         _logger.LogInformation("Chat message processed for conversation {ConversationId}", conversationId);
 
-        return Task.FromResult(new ChatResponseDto
+        return new ChatResponseDto
         {
-            Response = mockResponse,
+            Response = aiResponse,
             ConversationId = conversationId,
             Timestamp = DateTime.UtcNow
-        });
+        };
     }
 
     public Task<IEnumerable<ChatMessageDto>> GetChatHistoryAsync(string? conversationId)
