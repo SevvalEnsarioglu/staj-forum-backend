@@ -32,7 +32,7 @@ public class ChatService : IChatService
 
     public async Task<string> AnalyzeCvAsync(string cvText)
     {
-        var prompt = $"Bu bir stajyer CV'si. Bu CV'yi profesyonel ve uzman bir biçimde incele ve 3 güçlü yanını, 3 eksiğini maddeler halinde yaz maddeleri kısa öz tut. ardından Öneri: diyerek önerilerini net ve öz biçimde yaz. cevabının içeriğinde * ve # işareti kullanmana gerek yok tüm yazı aynı tip normal olsun! ardından CV Puanı: diyerek 10 üzerinden puanla. İşte CV: {cvText}";
+        var prompt = $"Bu bir stajyer CV'si. Bu bir cv'ye tümünü kopyala deyince çıkan yazı. Yani ekrandaki veriler sana daha düzensiz gelebilir, bu durum cv içeriğinden kaynaklı değil. Bunu kullanıcıya yansıtma. Bu CV'yi profesyonel ve uzman bir biçimde incele ve 3 güçlü yanını, 3 geliştirilebilir yönünü maddeler halinde yaz. maddeleri kısa öz tut. cevabının içeriğinde * ve # işareti kullanma, yazıları kalınlaştırmak için dahi olsa!. ardından CV Puanı: diyerek 10 üzerinden puanla. ardından Sonuç: diyerek önerilerini net ve öz biçimde yazıp kapanışı yap. İşte CV: {cvText}";
         var analysis = await _geminiService.GenerateResponseAsync(prompt);
         return analysis;
     }
