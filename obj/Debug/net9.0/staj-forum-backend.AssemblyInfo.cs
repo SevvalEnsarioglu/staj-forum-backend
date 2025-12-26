@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("staj-forum-backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8ea8741dee910ba13ff8814f959247db2ff4ad22")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fc5aa646a3ff1cc37949aec0ad4059176ef729b1")]
 [assembly: System.Reflection.AssemblyProductAttribute("staj-forum-backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("staj-forum-backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
