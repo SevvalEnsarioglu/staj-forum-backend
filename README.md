@@ -15,7 +15,7 @@ Staj Forum uygulamasinin RESTful API hizmetini saglayan backend sunucusudur. Web
 
 Proje PostgreSQL veritabanini kullanir. Ana tablolar:
 
-1.  **Topics:** Forum konulari (Baslik, Icerik, Olusturma Tarihi vb.).
+1.  **Topics:** Forum konulari (Baslik, Icerik, Olusturma Tarihi, Goruntulenme Sayisi vb.).
 2.  **Replies:** Konulara verilen cevaplar (Icerik, Konu ID vb.).
 3.  **Contacts:** Iletisim formu mesajlari.
 
@@ -27,7 +27,10 @@ Uygulamanin sundugu API uclari asagidaki gibidir:
 
 ### 1. Forum Islemleri (ForumController)
 
-*   `GET /api/forum/topics`: Tum konulari listeler (sayfalama ve arama destekli).
+*   `GET /api/forum/topics`: Tum konulari listeler.
+    *   **Siralamalar (`sortBy`):** `newest` (en yeni), `oldest` (en eski), `popular` (en çok görüntülenen), `least_viewed` (en az görüntülenen), `a_z` (alfabetik), `z_a` (ters alfabetik).
+    *   **Arama (`search`):** Başlık içinde arama yapar.
+    *   **Sayfalama:** `page` ve `pageSize` parametreleri ile.
 *   `GET /api/forum/topics/{id}`: Belirli bir konunun detaylarini getirir.
 *   `GET /api/forum/topics/{id}/replies`: Bir konuya ait cevaplari listeler.
 *   `POST /api/forum/topics`: Yeni bir konu olusturur.

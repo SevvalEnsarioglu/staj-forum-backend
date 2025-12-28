@@ -37,9 +37,13 @@ public class ForumRepository : IForumRepository
         }
 
         // Sorting
+        // Sorting
         query = sortBy.ToLower() switch
         {
-            "popular" => query.OrderByDescending(t => t.ViewCount).ThenByDescending(t => t.CreatedAt),
+            "popular" or "most_viewed" => query.OrderByDescending(t => t.ViewCount).ThenByDescending(t => t.Id),
+            "least_viewed" => query.OrderBy(t => t.ViewCount).ThenBy(t => t.Id),
+            "a_z" => query.OrderBy(t => t.Title),
+            "z_a" => query.OrderByDescending(t => t.Title),
             "oldest" => query.OrderBy(t => t.CreatedAt),
             _ => query.OrderByDescending(t => t.CreatedAt) // newest (default)
         };
