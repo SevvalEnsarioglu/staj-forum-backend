@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using staj_forum_backend.DTOs.Common;
 using staj_forum_backend.DTOs.Forum;
 using staj_forum_backend.Services;
+using System.Security.Claims;
 
 namespace staj_forum_backend.Controllers;
 
@@ -17,6 +18,16 @@ public class ForumController : ControllerBase
     {
         _forumService = forumService;
         _logger = logger;
+    }
+
+    private int? GetCurrentUserId()
+    {
+        var idClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (idClaim != null && int.TryParse(idClaim.Value, out int id))
+        {
+            return id;
+        }
+        return null;
     }
 
     /// <summary>
@@ -78,7 +89,8 @@ public class ForumController : ControllerBase
 
         try
         {
-            var topic = await _forumService.CreateTopicAsync(createTopicDto);
+            var userId = GetCurrentUserId();
+            var topic = await _forumService.CreateTopicAsync(createTopicDto, userId);
             return CreatedAtAction(nameof(GetTopicById), new { id = topic.Id }, topic);
         }
         catch (Exception ex)
@@ -175,7 +187,8 @@ public class ForumController : ControllerBase
 
         try
         {
-            var reply = await _forumService.CreateReplyAsync(topicId, createReplyDto);
+            var userId = GetCurrentUserId();
+            var reply = await _forumService.CreateReplyAsync(topicId, createReplyDto, userId);
             return CreatedAtAction(nameof(GetReplies), new { topicId }, reply);
         }
         catch (KeyNotFoundException ex)
@@ -238,6 +251,48 @@ public class ForumController : ControllerBase
             return StatusCode(500, new { error = "An error occurred while deleting the reply." });
         }
     }
+
+    /// <summary>
+    /// Kullanıcının kendi konularını listeler
+    /// </summary>
+    [HttpGet("users/{userId}/topics")]
+    [ProducesResponseType(typeof(PagedResultDto<TopicDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedResultDto<TopicDto>>> GetUserTopics(
+        int userId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        try
+        {
+            var result = await _forumService.GetTopicsByUserIdAsync(userId, page, pageSize);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting topics for user {UserId}", userId);
+            return StatusCode(500, new { error = "An error occurred while retrieving user topics." });
+        }
+    }
+
+    /// <summary>
+    /// Kullanıcının kendi yorumlarını listeler
+    /// </summary>
+    [HttpGet("users/{userId}/replies")]
+    [ProducesResponseType(typeof(PagedResultDto<ReplyDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedResultDto<ReplyDto>>> GetUserReplies(
+        int userId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        try
+        {
+            var result = await _forumService.GetRepliesByUserIdAsync(userId, page, pageSize);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting replies for user {UserId}", userId);
+            return StatusCode(500, new { error = "An error occurred while retrieving user replies." });
+        }
+    }
 }
-
-

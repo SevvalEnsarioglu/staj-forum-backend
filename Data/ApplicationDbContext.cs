@@ -13,6 +13,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Topic> Topics { get; set; }
     public DbSet<Reply> Replies { get; set; }
     public DbSet<ContactMessage> ContactMessages { get; set; }
+    public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,6 +31,11 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.AuthorName).HasMaxLength(100).IsRequired();
             entity.Property(e => e.CreatedAt).IsRequired();
             entity.Property(e => e.ViewCount).HasDefaultValue(0);
+
+            entity.HasOne(e => e.User)
+                  .WithMany(u => u.Topics)
+                  .HasForeignKey(e => e.UserId)
+                  .OnDelete(DeleteBehavior.SetNull);
         });
 
         // Reply configuration
@@ -48,6 +54,11 @@ public class ApplicationDbContext : DbContext
                 .WithMany(t => t.Replies)
                 .HasForeignKey(e => e.TopicId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.User)
+                  .WithMany(u => u.Replies)
+                  .HasForeignKey(e => e.UserId)
+                  .OnDelete(DeleteBehavior.SetNull);
         });
 
         // ContactMessage configuration
@@ -64,7 +75,18 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.CreatedAt).IsRequired();
             entity.Property(e => e.IsRead).HasDefaultValue(false);
         });
+
+        // User configuration
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Email).IsUnique().HasDatabaseName("IX_Users_Email");
+
+            entity.Property(e => e.FirstName).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.LastName).HasMaxLength(50).IsRequired();
+            entity.Property(e => e.Email).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.PasswordHash).IsRequired();
+            entity.Property(e => e.CreatedAt).IsRequired();
+        });
     }
 }
-
-

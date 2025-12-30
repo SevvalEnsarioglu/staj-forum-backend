@@ -26,9 +26,11 @@ public class Reply
 
     public DateTime? UpdatedAt { get; set; }
 
+    public int? UserId { get; set; }
+    [ForeignKey("UserId")]
+    public virtual User? User { get; set; }
+
     // Navigation property
     [ForeignKey("TopicId")]
     public virtual Topic Topic { get; set; } = null!;
 }
-
-

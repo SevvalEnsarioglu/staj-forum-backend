@@ -163,6 +163,37 @@ public class ForumRepository : IForumRepository
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<IEnumerable<Topic>> GetTopicsByUserIdAsync(int userId, int page, int pageSize)
+    {
+        return await _context.Topics
+            .Where(t => t.UserId == userId)
+            .OrderByDescending(t => t.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+    }
+
+    public async Task<int> GetTopicsCountByUserIdAsync(int userId)
+    {
+        return await _context.Topics
+            .CountAsync(t => t.UserId == userId);
+    }
+
+    public async Task<IEnumerable<Reply>> GetRepliesByUserIdAsync(int userId, int page, int pageSize)
+    {
+        return await _context.Replies
+            .Include(r => r.Topic)
+            .Where(r => r.UserId == userId)
+            .OrderByDescending(r => r.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+    }
+
+    public async Task<int> GetRepliesCountByUserIdAsync(int userId)
+    {
+        return await _context.Replies
+            .CountAsync(r => r.UserId == userId);
+    }
 }
-
-

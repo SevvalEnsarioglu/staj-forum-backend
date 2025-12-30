@@ -30,8 +30,10 @@ public class Topic
     [Required]
     public int ViewCount { get; set; } = 0;
 
+    public int? UserId { get; set; }
+    [ForeignKey("UserId")]
+    public virtual User? User { get; set; }
+
     // Navigation property
     public virtual ICollection<Reply> Replies { get; set; } = new List<Reply>();
 }
-
-

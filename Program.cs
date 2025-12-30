@@ -1,8 +1,11 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using staj_forum_backend.Data;
 using staj_forum_backend.Data.Repositories;
 using staj_forum_backend.Mappings;
 using staj_forum_backend.Services;
+using System.Text;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +25,20 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Authentication Configuration
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                builder.Configuration.GetSection("AppSettings:Token").Value ?? "default_secret_key")),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
+
 // AutoMapper Configuration
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
@@ -34,6 +51,7 @@ builder.Services.AddScoped<IContactRepository, ContactRepository>();
 builder.Services.AddScoped<IForumService, ForumService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IChatService, ChatService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddHttpClient<IGeminiService, GeminiService>();
 
 // CORS Configuration
@@ -71,7 +89,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-// CORS middleware - UseCors must be called before UseAuthorization and MapControllers
+// CORS middleware
 app.UseCors("AllowFrontend");
 
 if (!app.Environment.IsDevelopment())
@@ -79,6 +97,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

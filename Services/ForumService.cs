@@ -70,9 +70,10 @@ public class ForumService : IForumService
         return topicDetailDto;
     }
 
-    public async Task<TopicDto> CreateTopicAsync(CreateTopicDto createTopicDto)
+    public async Task<TopicDto> CreateTopicAsync(CreateTopicDto createTopicDto, int? userId = null)
     {
         var topic = _mapper.Map<Topic>(createTopicDto);
+        topic.UserId = userId; // Set optional UserId
         var createdTopic = await _forumRepository.CreateTopicAsync(topic);
         return _mapper.Map<TopicDto>(createdTopic);
     }
@@ -137,7 +138,7 @@ public class ForumService : IForumService
         };
     }
 
-    public async Task<ReplyDto> CreateReplyAsync(int topicId, CreateReplyDto createReplyDto)
+    public async Task<ReplyDto> CreateReplyAsync(int topicId, CreateReplyDto createReplyDto, int? userId = null)
     {
         // Check if topic exists
         var topic = await _forumRepository.GetTopicByIdAsync(topicId);
@@ -146,6 +147,7 @@ public class ForumService : IForumService
 
         var reply = _mapper.Map<Reply>(createReplyDto);
         reply.TopicId = topicId;
+        reply.UserId = userId; // Set optional UserId
 
         var createdReply = await _forumRepository.CreateReplyAsync(reply);
         return _mapper.Map<ReplyDto>(createdReply);
@@ -169,6 +171,59 @@ public class ForumService : IForumService
     {
         return await _forumRepository.DeleteReplyAsync(id);
     }
+
+    public async Task<PagedResultDto<TopicDto>> GetTopicsByUserIdAsync(int userId, int page, int pageSize)
+    {
+        // Validate pagination parameters
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        var topics = await _forumRepository.GetTopicsByUserIdAsync(userId, page, pageSize);
+        var totalCount = await _forumRepository.GetTopicsCountByUserIdAsync(userId);
+
+        var topicDtos = _mapper.Map<List<TopicDto>>(topics);
+
+        // Get reply counts for each topic
+        foreach (var topicDto in topicDtos)
+        {
+            var replyCount = await _forumRepository.GetRepliesCountByTopicIdAsync(topicDto.Id);
+            topicDto.ReplyCount = replyCount;
+        }
+
+        return new PagedResultDto<TopicDto>
+        {
+            Data = topicDtos,
+            Pagination = new PaginationDto
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            }
+        };
+    }
+
+    public async Task<PagedResultDto<ReplyDto>> GetRepliesByUserIdAsync(int userId, int page, int pageSize)
+    {
+        // Validate pagination parameters
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        var replies = await _forumRepository.GetRepliesByUserIdAsync(userId, page, pageSize);
+        var totalCount = await _forumRepository.GetRepliesCountByUserIdAsync(userId);
+
+        var replyDtos = _mapper.Map<List<ReplyDto>>(replies);
+
+        return new PagedResultDto<ReplyDto>
+        {
+            Data = replyDtos,
+            Pagination = new PaginationDto
+            {
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            }
+        };
+    }
 }
-
-
