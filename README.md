@@ -2,6 +2,9 @@
 
 Staj Forum uygulamasinin RESTful API hizmetini saglayan backend sunucusudur. Web ve mobil uygulamalarla es zamanli calisarak veri yonetimi, forum islemleri, kullanici kimlik dogrulama ve yapay zeka entegrasyonlarini yonetir.
 
+AĞ TABANLI PROJE TANITIMI YOUTUBE LİNK: https://youtu.be/qcWZVtor6gA
+IOS PROJE TANITIMI YOUTUBE LİNK: https://youtu.be/5uuTVMG2KJA
+
 ## Teknolojiler
 
 *   **Platform:** .NET Core 9
